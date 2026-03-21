@@ -5,51 +5,50 @@ export const generateHeaderImage = async (ownerDetails) => {
     canvas.height = 300;
     const ctx = canvas.getContext('2d');
 
-    // 1. Red Background
-    ctx.fillStyle = '#BC1F24';
-    ctx.fillRect(0, 0, 1600, 300);
-
-    // 2. Dark Gray Right Block
-    ctx.fillStyle = '#2A2A2A';
-    ctx.beginPath();
-    ctx.moveTo(700, 300);
-    ctx.bezierCurveTo(900, 300, 800, 0, 1100, 0);
-    ctx.lineTo(1600, 0);
-    ctx.lineTo(1600, 300);
-    ctx.fill();
-
-    // 3. Thick White Swoosh curve separating them
-    ctx.lineWidth = 15;
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.moveTo(700, 300);
-    ctx.bezierCurveTo(900, 300, 800, 0, 1100, 0);
-    ctx.stroke();
-
-    // 4. Little white accent curve
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.moveTo(750, 300);
-    ctx.bezierCurveTo(950, 300, 850, 0, 1150, 0);
-    ctx.stroke();
-
-    // 5. Embed the Exact 3D Logo from User
     const logoImg = new Image();
     logoImg.src = '/logo.jpg';
     logoImg.onload = () => {
-      // Draw image inside a softly rounded box to blend perfectly with the red
-      ctx.save();
+      // 1. Core Chromatic Extraction: Blend the 3D logo seamlessly
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = 180;
+      tempCanvas.height = 180;
+      const tCtx = tempCanvas.getContext('2d');
+      tCtx.drawImage(logoImg, 0, 0, 180, 180);
+      
+      // Sample a boundary pixel to discover the exact edge shade (e.g. vignette red)
+      const borderPixel = tCtx.getImageData(3, 3, 1, 1).data;
+      const dynamicBgColor = `rgb(${borderPixel[0]}, ${borderPixel[1]}, ${borderPixel[2]})`;
+
+      // 2. Base Red Header generated identically to the Logo's border
+      ctx.fillStyle = dynamicBgColor;
+      ctx.fillRect(0, 0, 1600, 300);
+
+      // 3. Dark Gray Right Block
+      ctx.fillStyle = '#2A2A2A';
       ctx.beginPath();
-      // Polyfill-safe rounded rect via arcs
-      ctx.moveTo(66, 50);
-      ctx.arcTo(230, 50, 230, 214, 16);
-      ctx.arcTo(230, 214, 66, 214, 16);
-      ctx.arcTo(50, 214, 50, 50, 16);
-      ctx.arcTo(50, 50, 230, 50, 16);
-      ctx.clip();
+      ctx.moveTo(700, 300);
+      ctx.bezierCurveTo(900, 300, 800, 0, 1100, 0);
+      ctx.lineTo(1600, 0);
+      ctx.lineTo(1600, 300);
+      ctx.fill();
+
+      // 4. Swoosh Curves
+      ctx.lineWidth = 15;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.moveTo(700, 300);
+      ctx.bezierCurveTo(900, 300, 800, 0, 1100, 0);
+      ctx.stroke();
+
+      ctx.lineWidth = 5;
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.moveTo(750, 300);
+      ctx.bezierCurveTo(950, 300, 850, 0, 1150, 0);
+      ctx.stroke();
+
+      // 5. Place the 3D Logo (It will now perfectly sink into its dynamically matched surroundings!)
       ctx.drawImage(logoImg, 50, 50, 180, 180);
-      ctx.restore();
 
       // 6. Draw "INTERIOR IT" Text Lockup
       ctx.font = 'bold 85px "Trebuchet MS", sans-serif';

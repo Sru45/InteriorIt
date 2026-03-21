@@ -68,10 +68,8 @@ export const exportToExcel = async (estimate, items, ownerDetails) => {
       row.getCell(2).font = { name: 'Times New Roman', size: 12, bold: true };
       
       for (let c = 1; c <= 7; c++) {
-        row.getCell(c).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } };
         row.getCell(c).border = { top: {style: 'thin'}, left: {style: 'thin'}, bottom: {style: 'thin'}, right: {style: 'thin'} };
       }
-      sheet.mergeCells(startRow, 2, startRow, 7);
     } else {
       row.getCell(1).value = itemNum++;
       row.getCell(2).value = item.itemName || '';

@@ -30,8 +30,9 @@ export const exportToPdf = async (estimate, items, ownerDetails) => {
   items.forEach((item) => {
     if (item.isSection) {
       tableRows.push([
-        { content: '', styles: { fillColor: [240, 240, 240] } },
-        { content: item.sectionName, colSpan: 6, styles: { fontStyle: 'bold', fillColor: [240, 240, 240] } }
+        '',
+        { content: item.sectionName, styles: { fontStyle: 'bold' } },
+        '', '', '', '', ''
       ]);
     } else {
       tableRows.push([
