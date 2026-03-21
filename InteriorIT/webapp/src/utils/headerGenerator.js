@@ -8,19 +8,26 @@ export const generateHeaderImage = async (ownerDetails) => {
     const logoImg = new Image();
     logoImg.src = '/logo.jpg';
     logoImg.onload = () => {
-      // 1. Core Chromatic Extraction: Blend the 3D logo seamlessly
+      // 1. Chromakey Extraction: Remove the 3D logo's red background to leave only pure Silver geometry
       const tempCanvas = document.createElement('canvas');
       tempCanvas.width = 180;
       tempCanvas.height = 180;
       const tCtx = tempCanvas.getContext('2d');
       tCtx.drawImage(logoImg, 0, 0, 180, 180);
       
-      // Sample a boundary pixel to discover the exact edge shade (e.g. vignette red)
-      const borderPixel = tCtx.getImageData(3, 3, 1, 1).data;
-      const dynamicBgColor = `rgb(${borderPixel[0]}, ${borderPixel[1]}, ${borderPixel[2]})`;
+      const imgData = tCtx.getImageData(0, 0, 180, 180);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i]; const g = data[i+1]; const b = data[i+2];
+        // Eliminate distinctly red pixels and extremely dark vignette pixels
+        if ((r > g + 25 && r > b + 25) || Math.max(r, g, b) < 30) {
+          data[i + 3] = 0; // Alpha = 0 (Transparent)
+        }
+      }
+      tCtx.putImageData(imgData, 0, 0);
 
-      // 2. Base Red Header generated identically to the Logo's border
-      ctx.fillStyle = dynamicBgColor;
+      // 2. Base Red Header tuned to perfectly match exact bright screenshot red
+      ctx.fillStyle = '#BA151B';
       ctx.fillRect(0, 0, 1600, 300);
 
       // 3. Dark Gray Right Block
@@ -41,8 +48,8 @@ export const generateHeaderImage = async (ownerDetails) => {
       ctx.bezierCurveTo(950, 300, 1100, 60, 1600, 60);
       ctx.stroke();
 
-      // 5. Place the 3D Logo (It will now perfectly sink into its dynamically matched surroundings!)
-      ctx.drawImage(logoImg, 50, 50, 180, 180);
+      // 5. Place the magically extracted 3D Logo
+      ctx.drawImage(tempCanvas, 50, 50, 180, 180);
 
       // 6. Draw "INTERIOR IT" Text Lockup
       ctx.font = 'bold 85px "Trebuchet MS", sans-serif';

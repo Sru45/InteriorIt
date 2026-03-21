@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { generateHeaderImage } from './headerGenerator';
 
 export const exportToPdf = async (estimate, items, ownerDetails, fileName = 'Estimate') => {
@@ -48,7 +48,7 @@ export const exportToPdf = async (estimate, items, ownerDetails, fileName = 'Est
     }
   });
 
-  doc.autoTable({
+  autoTable(doc, {
     head: [tableColumn],
     body: tableRows,
     startY: y,
@@ -60,8 +60,8 @@ export const exportToPdf = async (estimate, items, ownerDetails, fileName = 'Est
       2: { halign: 'center', cellWidth: 25 },
       3: { halign: 'center', cellWidth: 15 },
       4: { halign: 'center', cellWidth: 15 },
-      5: { cellWidth: 30 },
-      6: { cellWidth: 35 }
+      5: { cellWidth: 32 },
+      6: { cellWidth: 36 }
     },
     // Dynamically intercept rows to apply styling
     didParseCell: function (data) {
@@ -83,19 +83,19 @@ export const exportToPdf = async (estimate, items, ownerDetails, fileName = 'Est
   
   // Total Row manually drawn for exact layout mimicking
   doc.setFillColor(255, 255, 255);
-  doc.rect(145, finalY, 30, 8, 'FD'); // Rate col width
-  doc.rect(175, finalY, 35, 8, 'FD'); // Amount col width
+  doc.rect(127, finalY, 32, 8, 'FD'); // Rate col width exactly aligned under row
+  doc.rect(159, finalY, 36, 8, 'FD'); // Amount col width precisely filling the boundary
   
   doc.setFont('times', 'bold');
-  doc.text('Total', 165, finalY + 5.5, null, null, 'right');
+  doc.text('Total', 154, finalY + 5.5, null, null, 'right');
   
   // Green box for total like in Excel
   doc.setDrawColor(84, 130, 53); // RGB for exact Excel selection green #548235
   doc.setLineWidth(0.6);
-  doc.rect(175, finalY, 35, 8, 'D');
+  doc.rect(159, finalY, 36, 8, 'D');
 
   doc.setTextColor(0, 0, 0);
-  doc.text(`₹ ${estimate.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}`, 207, finalY + 5.5, null, null, 'right');
+  doc.text(`Rs. ${estimate.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}`, 192, finalY + 5.5, null, null, 'right');
 
   doc.save(`${fileName}.pdf`);
 };
