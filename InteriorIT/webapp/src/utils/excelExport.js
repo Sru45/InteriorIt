@@ -1,7 +1,7 @@
 import ExcelJS from 'exceljs';
 import { generateHeaderImage } from './headerGenerator';
 
-export const exportToExcel = async (estimate, items, ownerDetails) => {
+export const exportToExcel = async (estimate, items, ownerDetails, fileName = 'Estimate') => {
   const imageBase64 = await generateHeaderImage(ownerDetails);
   const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, "");
 
@@ -113,10 +113,10 @@ export const exportToExcel = async (estimate, items, ownerDetails) => {
 
   const buffer = await workbook.xlsx.writeBuffer();
   const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Estimate_${Date.now()}.xlsx`;
-  a.click();
-  URL.revokeObjectURL(url);
+  const url = window.URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${fileName}.xlsx`;
+  anchor.click();
+  window.URL.revokeObjectURL(url);
 };

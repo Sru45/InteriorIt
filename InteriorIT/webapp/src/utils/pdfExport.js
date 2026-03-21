@@ -2,7 +2,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { generateHeaderImage } from './headerGenerator';
 
-export const exportToPdf = async (estimate, items, ownerDetails) => {
+export const exportToPdf = async (estimate, items, ownerDetails, fileName = 'Estimate') => {
   const imageBase64 = await generateHeaderImage(ownerDetails);
   const doc = new jsPDF();
 
@@ -27,11 +27,12 @@ export const exportToPdf = async (estimate, items, ownerDetails) => {
   const tableRows = [];
 
   let itemNum = 1;
+
   items.forEach((item) => {
     if (item.isSection) {
       tableRows.push([
         '',
-        { content: item.sectionName, styles: { fontStyle: 'bold' } },
+        item.sectionName || '', // Plain string to avoid jspdf-autotable crashing on object structures or undefined
         '', '', '', '', ''
       ]);
     } else {
@@ -61,6 +62,20 @@ export const exportToPdf = async (estimate, items, ownerDetails) => {
       4: { halign: 'center', cellWidth: 15 },
       5: { cellWidth: 30 },
       6: { cellWidth: 35 }
+    },
+    // Dynamically intercept rows to apply styling
+    didParseCell: function (data) {
+      if (data.section === 'body') {
+        const itemIndex = data.row.index;
+        const mappedItem = items[itemIndex];
+        if (mappedItem && mappedItem.isSection) {
+          // If this is a Section row, bold the text in the "Items & Description" column
+          if (data.column.index === 1) {
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fontSize = 12;
+          }
+        }
+      }
     }
   });
 
@@ -82,5 +97,5 @@ export const exportToPdf = async (estimate, items, ownerDetails) => {
   doc.setTextColor(0, 0, 0);
   doc.text(`₹ ${estimate.totalAmount.toLocaleString('en-IN', {minimumFractionDigits: 2})}`, 207, finalY + 5.5, null, null, 'right');
 
-  doc.save(`Estimate_${Date.now()}.pdf`);
+  doc.save(`${fileName}.pdf`);
 };

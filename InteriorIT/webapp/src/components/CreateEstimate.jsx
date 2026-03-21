@@ -51,7 +51,7 @@ export default function CreateEstimate({ isEdit }) {
 
   const handleItemChange = (itemId, field, value) => {
     setItems(items.map(item => {
-      if (item.id === id) {
+      if (item.id === itemId) {
         const updated = { ...item, [field]: value };
         if (field === 'length' || field === 'width' || field === 'qty' || field === 'rate') {
           updated.sqft = ((updated.length || 0) * (updated.width || 0) * (updated.qty || 0)) / 144;
@@ -99,9 +99,11 @@ export default function CreateEstimate({ isEdit }) {
   };
 
   const handleExportExcel = async () => {
+    const fileName = prompt("Enter a name for the Excel file:", clientName ? `${clientName.trim()}_Estimate` : 'Estimate');
+    if (!fileName) return; // cancelled
     try {
       const estimate = { client: { name: clientName, mobile: clientMobile, address: clientAddress }, totalAmount };
-      await exportToExcel(estimate, items, ownerDetails);
+      await exportToExcel(estimate, items, ownerDetails, fileName);
     } catch (e) {
       console.error(e);
       alert("Failed to export Excel: " + e.message);
@@ -109,9 +111,11 @@ export default function CreateEstimate({ isEdit }) {
   };
 
   const handleExportPdf = async () => {
+    const fileName = prompt("Enter a name for the PDF file:", clientName ? `${clientName.trim()}_Estimate` : 'Estimate');
+    if (!fileName) return; // cancelled
     try {
       const estimate = { client: { name: clientName, mobile: clientMobile, address: clientAddress }, totalAmount };
-      await exportToPdf(estimate, items, ownerDetails);
+      await exportToPdf(estimate, items, ownerDetails, fileName);
     } catch (e) {
       console.error(e);
       alert("Failed to export PDF: " + e.message);

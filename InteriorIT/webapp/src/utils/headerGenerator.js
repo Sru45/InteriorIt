@@ -26,25 +26,19 @@ export const generateHeaderImage = async (ownerDetails) => {
       // 3. Dark Gray Right Block
       ctx.fillStyle = '#2A2A2A';
       ctx.beginPath();
-      ctx.moveTo(700, 300);
-      ctx.bezierCurveTo(900, 300, 800, 0, 1100, 0);
-      ctx.lineTo(1600, 0);
+      // Start further left, arch up, and flatten out before the top edge
+      ctx.moveTo(550, 300);
+      ctx.bezierCurveTo(950, 300, 1100, 60, 1600, 60);
       ctx.lineTo(1600, 300);
       ctx.fill();
 
-      // 4. Swoosh Curves
+      // 4. Swoosh Curve
+      // Master white curve tracing the grey border
       ctx.lineWidth = 15;
       ctx.strokeStyle = '#FFFFFF';
       ctx.beginPath();
-      ctx.moveTo(700, 300);
-      ctx.bezierCurveTo(900, 300, 800, 0, 1100, 0);
-      ctx.stroke();
-
-      ctx.lineWidth = 5;
-      ctx.strokeStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.moveTo(750, 300);
-      ctx.bezierCurveTo(950, 300, 850, 0, 1150, 0);
+      ctx.moveTo(550, 300);
+      ctx.bezierCurveTo(950, 300, 1100, 60, 1600, 60);
       ctx.stroke();
 
       // 5. Place the 3D Logo (It will now perfectly sink into its dynamically matched surroundings!)
@@ -86,13 +80,14 @@ export const generateHeaderImage = async (ownerDetails) => {
         gstin: '24AAAAA0000A1Z5'
       };
 
-      ctx.font = '35px sans-serif';
-      ctx.fillText(details.name, 1550, 80);
+      // Shrunk text and pushed Y-coordinates down to avoid curve overlapping
+      ctx.font = 'bold 28px "Trebuchet MS", sans-serif';
+      ctx.fillText(details.name, 1550, 125);
       
-      ctx.font = '28px sans-serif';
-      ctx.fillText(`${details.mobile1} | ${details.mobile2}`, 1550, 130);
-      ctx.fillText(details.address, 1550, 175);
-      ctx.fillText(details.email, 1550, 220);
+      ctx.font = '22px "Trebuchet MS", sans-serif';
+      ctx.fillText(`${details.mobile1} | ${details.mobile2}`, 1550, 160);
+      ctx.fillText(details.address, 1550, 195);
+      ctx.fillText(details.email, 1550, 230);
       ctx.fillText(`GSTIN: ${details.gstin}`, 1550, 265);
 
       // Extract as Base64 PNG
