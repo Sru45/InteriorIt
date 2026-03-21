@@ -23,12 +23,16 @@ function AuthenticatedApp({ setAuth }) {
 }
 
 export default function App() {
+  const [isAuthLoaded, setIsAuthLoaded] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('auth_token');
     if (token) setIsAuthenticated(true);
+    setIsAuthLoaded(true);
   }, []);
+
+  if (!isAuthLoaded) return null; // Hold frame visually until Auth is scanned
 
   return (
     <BrowserRouter>
