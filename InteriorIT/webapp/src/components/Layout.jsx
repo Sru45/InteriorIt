@@ -15,7 +15,7 @@ export default function Layout({ children, setAuth }) {
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'New Estimate', path: '/create-estimate', icon: <FilePlus size={20} /> },
     { name: 'History', path: '/history', icon: <HistoryIcon size={20} /> },
-    { name: 'Settings', path: '/profile', icon: <Settings size={20} /> }
+    { name: 'User Profile', path: '/profile', icon: <Settings size={20} /> }
   ];
 
   return (
