@@ -7,15 +7,47 @@ export default function History() {
   const [estimates, setEstimates] = useState([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('interior_estimates');
-    if (saved) setEstimates(JSON.parse(saved));
+    const fetchEstimates = async () => {
+      try {
+        const res = await fetch('/.netlify/functions/api/estimate/all', {
+          headers: { 'x-auth-token': localStorage.getItem('auth_token') }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const formatted = data.map(d => ({
+            id: d._id,
+            client: { 
+              name: d.clientId?.name || 'Unknown', 
+              mobile: d.clientId?.mobile || '', 
+              address: d.clientId?.address || '' 
+            },
+            totalAmount: d.totalAmount,
+            date: d.date
+          }));
+          setEstimates(formatted);
+        }
+      } catch (e) {
+        console.error("History fetch error:", e);
+      }
+    };
+    fetchEstimates();
   }, []);
 
-  const handleDelete = (id) => {
-    if(window.confirm('Are you sure you want to delete this estimate?')) {
-      const newEstimates = estimates.filter(e => e.id !== id);
-      setEstimates(newEstimates);
-      localStorage.setItem('interior_estimates', JSON.stringify(newEstimates));
+  const handleDelete = async (id) => {
+    if(window.confirm('Are you sure you want to delete this estimate absolutely forever?')) {
+      try {
+        const res = await fetch(`/.netlify/functions/api/estimate/delete/${id}`, {
+          method: 'DELETE',
+          headers: { 'x-auth-token': localStorage.getItem('auth_token') }
+        });
+        if (res.ok) {
+          setEstimates(estimates.filter(e => e.id !== id));
+        } else {
+          alert('Delete failed - check server connection');
+        }
+      } catch (e) {
+        alert('Server Error during deletion');
+      }
     }
   };
 

@@ -4,12 +4,27 @@ export default function Login({ setAuth }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (email && password) {
-      localStorage.setItem('auth_token', 'dummy_jwt_token_123');
-      localStorage.setItem('user_name', 'Babu Suthar');
-      setAuth(true);
+      try {
+        const res = await fetch('/.netlify/functions/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          localStorage.setItem('auth_token', data.token);
+          localStorage.setItem('user_name', data.name || 'User');
+          setAuth(true);
+        } else {
+          alert(`Login failed: ${data.msg || 'Invalid Credentials'}`);
+        }
+      } catch (err) {
+        alert('Server Error: Database might be booting up, try again in a few seconds!');
+      }
     }
   };
 

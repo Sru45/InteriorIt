@@ -38,14 +38,36 @@ export default function CreateEstimate({ isEdit }) {
     generateHeaderImage(loadedOwner).then(b64 => setHeaderPreview(b64));
 
     if (isEdit && id) {
-      const saved = JSON.parse(localStorage.getItem('interior_estimates') || '[]');
-      const existing = saved.find(e => e.id === id);
-      if (existing) {
-        setClientName(existing.client.name);
-        setClientMobile(existing.client.mobile);
-        setClientAddress(existing.client.address);
-        setItems(existing.items);
-      }
+      const loadEstimate = async () => {
+        try {
+          const res = await fetch(`/.netlify/functions/api/estimate/${id}`, {
+            headers: { 'x-auth-token': localStorage.getItem('auth_token') }
+          });
+          if (res.ok) {
+            const data = await res.json();
+            setClientName(data.client.name || '');
+            setClientMobile(data.client.mobile || '');
+            setClientAddress(data.client.address || '');
+            
+            const fetchedItems = data.items.map(i => ({
+              id: i._id,
+              isSection: i.isSection || false,
+              sectionName: i.sectionName || '',
+              itemName: i.itemName || '',
+              length: i.length || 0,
+              width: i.width || 0,
+              qty: i.qty || 1,
+              rate: i.rate || 0,
+              sqft: i.sqft || 0,
+              amount: i.amount || 0
+            }));
+            if (fetchedItems.length > 0) setItems(fetchedItems);
+          }
+        } catch (e) {
+          console.error("Failed to load estimate", e);
+        }
+      };
+      loadEstimate();
     }
   }, [isEdit, id]);
 
@@ -77,25 +99,44 @@ export default function CreateEstimate({ isEdit }) {
 
   const totalAmount = items.reduce((sum, item) => sum + (item.isSection ? 0 : (item.amount || 0)), 0);
 
-  const handleSave = () => {
-    const saved = JSON.parse(localStorage.getItem('interior_estimates') || '[]');
-    const newEst = {
-      id: isEdit && id ? id : Date.now().toString(),
+  const handleSave = async () => {
+    const payload = {
       client: { name: clientName, mobile: clientMobile, address: clientAddress },
       items,
-      totalAmount,
-      date: isEdit && id ? saved.find(e => e.id === id)?.date || new Date().toISOString() : new Date().toISOString()
+      totalAmount
     };
+    const token = localStorage.getItem('auth_token');
     
-    if (isEdit && id) {
-      const updatedList = saved.map(e => e.id === id ? newEst : e);
-      localStorage.setItem('interior_estimates', JSON.stringify(updatedList));
-      alert('Estimate Updated!');
-    } else {
-      localStorage.setItem('interior_estimates', JSON.stringify([newEst, ...saved]));
-      alert('Estimate Saved!');
+    try {
+      if (isEdit && id) {
+        const res = await fetch(`/.netlify/functions/api/estimate/update/${id}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert('Estimate Updated!');
+          navigate('/dashboard');
+        } else {
+          alert('Update Failed - Please check internet connection');
+        }
+      } else {
+        const res = await fetch('/.netlify/functions/api/estimate/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'x-auth-token': token },
+          body: JSON.stringify(payload)
+        });
+        if (res.ok) {
+          alert('Estimate Saved securely to Cloud!');
+          navigate('/dashboard');
+        } else {
+          alert('Save Failed - Please check internet connection');
+        }
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error saving estimate to Serverless Database');
     }
-    navigate('/dashboard');
   };
 
   const handleExportExcel = async () => {

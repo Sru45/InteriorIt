@@ -7,8 +7,30 @@ export default function Dashboard() {
   const [estimates, setEstimates] = useState([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('interior_estimates');
-    if (saved) setEstimates(JSON.parse(saved));
+    const fetchEstimates = async () => {
+      try {
+        const res = await fetch('/.netlify/functions/api/estimate/all', {
+          headers: { 'x-auth-token': localStorage.getItem('auth_token') }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          const formatted = data.map(d => ({
+            id: d._id,
+            client: { 
+              name: d.clientId?.name || 'Unknown', 
+              mobile: d.clientId?.mobile || '', 
+              address: d.clientId?.address || '' 
+            },
+            totalAmount: d.totalAmount,
+            date: d.date
+          }));
+          setEstimates(formatted);
+        }
+      } catch (e) {
+        console.error("Dashboard fetch error:", e);
+      }
+    };
+    fetchEstimates();
   }, []);
 
   const totalRevenue = estimates.reduce((sum, e) => sum + (e.totalAmount || 0), 0);
