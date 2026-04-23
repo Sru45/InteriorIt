@@ -17,7 +17,7 @@ export const exportToPdf = async (estimate, items, ownerDetails, fileName = 'Est
   // Client Details
   doc.text(`Client Name: ${estimate.client?.name || ''}`, 15, y);
   y += 7;
-  doc.text(`Mobile: ${estimate.client?.mobile || ''}`, 15, y);
+  doc.text(`GSTIN: ${estimate.client?.gst || ''}`, 15, y);
   y += 7;
   doc.text(`Address: ${estimate.client?.address || ''}`, 15, y);
   y += 10;

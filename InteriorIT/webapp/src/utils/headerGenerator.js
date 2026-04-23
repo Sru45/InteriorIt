@@ -83,8 +83,7 @@ export const generateHeaderImage = async (ownerDetails) => {
         mobile1: '+91 97234 65421',
         mobile2: '+91 94275 15584',
         address: 'Vasad-396001 Gujarat',
-        email: 'h.i.suthar85@gmail.com',
-        gstin: '24AAAAA0000A1Z5'
+        email: 'h.i.suthar85@gmail.com'
       };
 
       // Shrunk text and pushed Y-coordinates down to avoid curve overlapping
@@ -93,9 +92,8 @@ export const generateHeaderImage = async (ownerDetails) => {
       
       ctx.font = '22px "Trebuchet MS", sans-serif';
       ctx.fillText(`${details.mobile1} | ${details.mobile2}`, 1550, 160);
-      ctx.fillText(details.address, 1550, 195);
-      ctx.fillText(details.email, 1550, 230);
-      ctx.fillText(`GSTIN: ${details.gstin}`, 1550, 265);
+      ctx.fillText(`Address: ${details.address}`, 1550, 195);
+      ctx.fillText(`Email: ${details.email}`, 1550, 230);
 
       // Extract as Base64 PNG
       const base64Image = canvas.toDataURL('image/png');

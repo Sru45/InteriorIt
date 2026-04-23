@@ -8,8 +8,7 @@ export default function Profile() {
     mobile1: '+91 97234 65421',
     mobile2: '+91 94275 15584',
     address: 'Vasad-396001 Gujarat',
-    email: 'h.i.suthar85@gmail.com',
-    gstin: '24AAAAA0000A1Z5'
+    email: 'h.i.suthar85@gmail.com'
   });
 
   useEffect(() => {
@@ -42,7 +41,6 @@ export default function Profile() {
           <input type="text" name="mobile2" className="input-field" placeholder="Mobile 2" value={details.mobile2} onChange={handleChange} />
           <input type="text" name="email" className="input-field" placeholder="Email Address" value={details.email} onChange={handleChange} />
           <input type="text" name="address" className="input-field" placeholder="Address" value={details.address} onChange={handleChange} />
-          <input type="text" name="gstin" className="input-field" placeholder="GST Number" value={details.gstin} onChange={handleChange} />
           <button className="btn" style={{ width: '100%' }} onClick={handleSave}>Save Profile</button>
         </div>
       </div>

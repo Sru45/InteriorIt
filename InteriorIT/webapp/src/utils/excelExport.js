@@ -26,7 +26,7 @@ export const exportToExcel = async (estimate, items, ownerDetails, fileName = 'E
 
   // Client Info
   sheet.getCell('A7').value = `Client Name: ${estimate.client?.name || ''}`;
-  sheet.getCell('A8').value = `Mobile: ${estimate.client?.mobile || ''}`;
+  sheet.getCell('A8').value = `GSTIN: ${estimate.client?.gst || ''}`;
   sheet.getCell('A9').value = `Address: ${estimate.client?.address || ''}`;
 
   sheet.getCell('A7').font = { name: 'Times New Roman', size: 12 };

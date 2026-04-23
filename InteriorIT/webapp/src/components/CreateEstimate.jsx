@@ -8,7 +8,7 @@ export default function CreateEstimate({ isEdit }) {
   const navigate = useNavigate();
   const { id } = useParams();
   const [clientName, setClientName] = useState('');
-  const [clientMobile, setClientMobile] = useState('');
+  const [clientGst, setClientGst] = useState('');
   const [clientAddress, setClientAddress] = useState('');
 
   const [ownerDetails, setOwnerDetails] = useState({
@@ -42,7 +42,7 @@ export default function CreateEstimate({ isEdit }) {
       const existing = saved.find(e => e.id === id);
       if (existing) {
         setClientName(existing.client.name);
-        setClientMobile(existing.client.mobile);
+        setClientGst(existing.client.gst || '');
         setClientAddress(existing.client.address);
         setItems(existing.items);
       }
@@ -81,7 +81,7 @@ export default function CreateEstimate({ isEdit }) {
     const saved = JSON.parse(localStorage.getItem('interior_estimates') || '[]');
     const newEst = {
       id: isEdit && id ? id : Date.now().toString(),
-      client: { name: clientName, mobile: clientMobile, address: clientAddress },
+      client: { name: clientName, gst: clientGst, address: clientAddress },
       items,
       totalAmount,
       date: isEdit && id ? saved.find(e => e.id === id)?.date || new Date().toISOString() : new Date().toISOString()
@@ -102,7 +102,7 @@ export default function CreateEstimate({ isEdit }) {
     const fileName = prompt("Enter a name for the Excel file:", clientName ? `${clientName.trim()}_Estimate` : 'Estimate');
     if (!fileName) return; // cancelled
     try {
-      const estimate = { client: { name: clientName, mobile: clientMobile, address: clientAddress }, totalAmount };
+      const estimate = { client: { name: clientName, gst: clientGst, address: clientAddress }, totalAmount };
       await exportToExcel(estimate, items, ownerDetails, fileName);
     } catch (e) {
       console.error(e);
@@ -114,7 +114,7 @@ export default function CreateEstimate({ isEdit }) {
     const fileName = prompt("Enter a name for the PDF file:", clientName ? `${clientName.trim()}_Estimate` : 'Estimate');
     if (!fileName) return; // cancelled
     try {
-      const estimate = { client: { name: clientName, mobile: clientMobile, address: clientAddress }, totalAmount };
+      const estimate = { client: { name: clientName, gst: clientGst, address: clientAddress }, totalAmount };
       await exportToPdf(estimate, items, ownerDetails, fileName);
     } catch (e) {
       console.error(e);
@@ -145,7 +145,7 @@ export default function CreateEstimate({ isEdit }) {
         <div className="card">
           <h3 style={{ marginTop: 0 }}>Client Details</h3>
           <input type="text" placeholder="Client Name" className="input-field" value={clientName} onChange={e => setClientName(e.target.value)} />
-          <input type="text" placeholder="Mobile Number" className="input-field" value={clientMobile} onChange={e => setClientMobile(e.target.value)} />
+          <input type="text" placeholder="Client GST Number" className="input-field" value={clientGst} onChange={e => setClientGst(e.target.value)} />
           <input type="text" placeholder="Address" className="input-field" value={clientAddress} onChange={e => setClientAddress(e.target.value)} />
         </div>
 
