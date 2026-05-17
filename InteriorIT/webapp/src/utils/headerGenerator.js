@@ -82,18 +82,31 @@ export const generateHeaderImage = async (ownerDetails) => {
         name: 'Babu Suthar',
         mobile1: '+91 97234 65421',
         mobile2: '+91 94275 15584',
-        address: 'Vasad-396001 Gujarat',
-        email: 'h.i.suthar85@gmail.com'
+        address: '24-A, Sona plot, Abrama, Vasad-396001 Gujarat',
+        email: 'h.i.suthar85@gmail.com',
+        ownerGst: '24BWHPS9275B129',
+        ownerTextSize: '20'
       };
+
+      const txtSize = parseInt(details.ownerTextSize) || 20;
+
+      ctx.fillStyle = '#FFFFFF';
 
       // Shrunk text and pushed Y-coordinates down to avoid curve overlapping
       ctx.font = 'bold 28px "Trebuchet MS", sans-serif';
       ctx.fillText(details.name, 1550, 125);
       
-      ctx.font = '22px "Trebuchet MS", sans-serif';
-      ctx.fillText(`${details.mobile1} | ${details.mobile2}`, 1550, 160);
-      ctx.fillText(`Address: ${details.address}`, 1550, 195);
-      ctx.fillText(`Email: ${details.email}`, 1550, 230);
+      ctx.font = `${txtSize}px "Trebuchet MS", sans-serif`;
+      const ySpacing = txtSize + 13;
+
+      ctx.fillText(`${details.mobile1} | ${details.mobile2}`, 1550, 125 + ySpacing);
+      ctx.fillText(`Address: ${details.address}`, 1550, 125 + ySpacing * 2);
+      ctx.fillText(`Email: ${details.email}`, 1550, 125 + ySpacing * 3);
+      
+      const finalOwnerGst = details.ownerGst !== undefined ? details.ownerGst : '24BWHPS9275B129';
+      if (finalOwnerGst) {
+        ctx.fillText(`GSTINNO: ${finalOwnerGst}`, 1550, 125 + ySpacing * 4);
+      }
 
       // Extract as Base64 PNG
       const base64Image = canvas.toDataURL('image/png');

@@ -1,21 +1,28 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FilePlus, History as HistoryIcon, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, FilePlus, History as HistoryIcon, Settings, LogOut, Users } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
-export default function Layout({ children, setAuth }) {
+export default function Layout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    if (setAuth) setAuth(false);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Failed to log out', error);
+    }
   };
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <LayoutDashboard size={20} /> },
     { name: 'New Estimate', path: '/create-estimate', icon: <FilePlus size={20} /> },
+    { name: 'Clients', path: '/clients', icon: <Users size={20} /> },
     { name: 'History', path: '/history', icon: <HistoryIcon size={20} /> },
-    { name: 'Settings', path: '/profile', icon: <Settings size={20} /> }
+    { name: 'Company Branding', path: '/profile', icon: <Settings size={20} /> }
   ];
 
   return (

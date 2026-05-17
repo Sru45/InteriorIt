@@ -1,15 +1,37 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, History as HistoryIcon, FileText, IndianRupee, Users } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [estimates, setEstimates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('interior_estimates');
-    if (saved) setEstimates(JSON.parse(saved));
-  }, []);
+    async function loadEstimates() {
+      if (!currentUser) return;
+      try {
+        const q = query(
+          collection(db, 'users', currentUser.uid, 'estimates'),
+          orderBy('date', 'desc')
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedEstimates = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        setEstimates(fetchedEstimates);
+      } catch (err) {
+        console.error("Failed to load estimates", err);
+      }
+      setLoading(false);
+    }
+    loadEstimates();
+  }, [currentUser]);
 
   const totalRevenue = estimates.reduce((sum, e) => sum + (e.totalAmount || 0), 0);
   const uniqueClients = new Set(estimates.map(e => e.client.name.toLowerCase().trim())).size;
@@ -116,7 +138,12 @@ export default function Dashboard() {
             </div>
             <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 'bold' }}>₹ {est.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
-              <span style={{ backgroundColor: '#f0f0f0', color: '#666', padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '500' }}>draft</span>
+              {(() => {
+                const statusColors = { Draft: { bg: '#f0f0f0', color: '#666' }, Sent: { bg: '#cce5ff', color: '#004085' }, Approved: { bg: '#d4edda', color: '#155724' }, Rejected: { bg: '#f8d7da', color: '#721c24' } };
+                const estStatus = est.status || 'Draft';
+                const colors = statusColors[estStatus] || statusColors.Draft;
+                return <span style={{ backgroundColor: colors.bg, color: colors.color, padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '500' }}>{estStatus}</span>;
+              })()}
             </div>
           </div>
         ))}

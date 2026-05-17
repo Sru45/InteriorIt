@@ -1,0 +1,12 @@
+node_modules/
+dist/
+build/
+.env
+.netlify/
+.cache/
+android/.gradle/
+android/build/
+android/app/build/
+android/.idea/
+android/local.properties
+.DS_Store

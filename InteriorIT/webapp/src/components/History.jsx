@@ -1,21 +1,42 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileText, Edit, Trash2 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import { db } from '../firebase';
+import { collection, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
 
 export default function History() {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [estimates, setEstimates] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const saved = localStorage.getItem('interior_estimates');
-    if (saved) setEstimates(JSON.parse(saved));
-  }, []);
+    async function loadEstimates() {
+      if (!currentUser) return;
+      try {
+        const q = query(collection(db, 'users', currentUser.uid, 'estimates'), orderBy('date', 'desc'));
+        const querySnapshot = await getDocs(q);
+        const fetched = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setEstimates(fetched);
+      } catch (e) {
+        console.error("Failed to load estimates", e);
+      }
+      setLoading(false);
+    }
+    loadEstimates();
+  }, [currentUser]);
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
+    if(!currentUser) return;
     if(window.confirm('Are you sure you want to delete this estimate?')) {
-      const newEstimates = estimates.filter(e => e.id !== id);
-      setEstimates(newEstimates);
-      localStorage.setItem('interior_estimates', JSON.stringify(newEstimates));
+      try {
+        await deleteDoc(doc(db, 'users', currentUser.uid, 'estimates', id));
+        setEstimates(estimates.filter(e => e.id !== id));
+      } catch (e) {
+        console.error("Failed to delete estimate", e);
+        alert("Failed to delete estimate");
+      }
     }
   };
 
@@ -43,6 +64,12 @@ export default function History() {
                 </div>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
+                {(() => {
+                  const statusColors = { Draft: { bg: '#f0f0f0', color: '#666' }, Sent: { bg: '#cce5ff', color: '#004085' }, Approved: { bg: '#d4edda', color: '#155724' }, Rejected: { bg: '#f8d7da', color: '#721c24' } };
+                  const estStatus = est.status || 'Draft';
+                  const colors = statusColors[estStatus] || statusColors.Draft;
+                  return <span style={{ backgroundColor: colors.bg, color: colors.color, padding: '4px 12px', borderRadius: '12px', fontSize: '12px', fontWeight: '500' }}>{estStatus}</span>;
+                })()}
                 <h3 style={{ margin: '0', fontSize: '18px', fontWeight: 'bold' }}>₹ {est.totalAmount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</h3>
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={() => navigate(`/edit-estimate/${est.id}`)} style={{ backgroundColor: '#f8f9fa', border: '1px solid #ddd', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'box-shadow 0.2s' }} onMouseOver={e=>e.currentTarget.style.boxShadow='0 2px 4px rgba(0,0,0,0.1)'} onMouseOut={e=>e.currentTarget.style.boxShadow='none'}>
